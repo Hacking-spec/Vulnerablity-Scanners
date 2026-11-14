@@ -1,0 +1,14 @@
+# VulnGuard AI Dependencies
+fastapi>=0.115.0
+uvicorn>=0.30.0
+pydantic>=2.0.0
+requests>=2.31.0
+cryptography>=42.0.0
+packaging>=23.0
+python-dotenv>=1.0.0
+
+# Optional AI Providers (installed if live API keys are used)
+google-genai>=1.0.0
+openai>=1.0.0
+groq>=0.13.0
+
