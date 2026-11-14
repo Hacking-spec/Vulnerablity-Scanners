@@ -324,8 +324,24 @@ async def export_html(scan_id: str):
 </html>"""
     return HTMLResponse(content=html)
 
-# Serve Static UI files
+# Explicit root route for serverless & cloud deployments (Vercel, Render, etc.)
+@app.get("/", response_class=HTMLResponse)
+async def serve_dashboard():
+    static_index = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    if os.path.exists(static_index):
+        with open(static_index, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h2>VulnGuard AI is running. Static files missing.</h2>")
+
+# Serve Static UI files (CSS, JS, assets)
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
-    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+    # Mount sub-paths for direct assets
+    css_dir = os.path.join(static_dir, "css")
+    js_dir = os.path.join(static_dir, "js")
+    if os.path.exists(css_dir):
+        app.mount("/css", StaticFiles(directory=css_dir), name="css_static")
+    if os.path.exists(js_dir):
+        app.mount("/js", StaticFiles(directory=js_dir), name="js_static")
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static_root")
 
