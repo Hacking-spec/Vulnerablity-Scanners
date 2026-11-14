@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnGuard AI — Vulnerability Management & Security Assistant</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z'/></svg>">
+    <!-- Google Font: Inter & Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main Clean Stylesheet -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Marked for Markdown rendering in chat -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+    <!-- TOP NAVIGATION COMMAND BAR -->
+    <header class="navbar">
+        <a href="#" class="brand">
+            <div class="brand-icon">🛡️</div>
+            <div>
+                <div class="brand-title">VulnGuard AI</div>
+                <div class="brand-subtitle">Security Audit & Remediation Platform</div>
+            </div>
+        </a>
+
+        <!-- AUDIT ENGINE TABS -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="web-tab">
+                <span>🌐</span> Web Endpoint
+            </button>
+            <button class="nav-tab" data-tab="code-tab">
+                <span>💻</span> Code / SAST
+            </button>
+            <button class="nav-tab" data-tab="ports-tab">
+                <span>🔌</span> Port Audit
+            </button>
+            <button class="nav-tab" data-tab="deps-tab">
+                <span>📦</span> Dependencies
+            </button>
+            <button class="nav-tab" data-tab="history-tab">
+                <span>📜</span> History
+            </button>
+        </nav>
+
+        <!-- COMMAND ACTIONS -->
+        <div class="nav-actions">
+            <button class="btn btn-secondary btn-sm" id="btn-settings" title="Configure AI Provider">
+                ⚙️ Engine: <span id="current-provider-badge" style="color: #2563eb; font-weight: 700; margin-left: 3px;">Offline Expert</span>
+            </button>
+            <button class="btn btn-primary btn-sm" id="btn-toggle-chat" title="Toggle AI Security Assistant">
+                <span>🤖</span> SentinelAI
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN DASHBOARD BODY -->
+    <div class="app-container">
+
+        <!-- SCANNERS & RESULTS VIEW -->
+        <main class="main-content">
+
+            <!-- TAB 1: WEB ENDPOINT AUDITOR -->
+            <section id="web-tab" class="tab-pane active">
+                <div class="card">
+                    <h2 class="card-title">🌐 Web Endpoint & Security Headers Auditor</h2>
+                    <p class="card-subtitle">
+                        Performs defensive security analysis on target URLs: SSL/TLS certificate validity, HTTP defensive headers (CSP, HSTS, X-Frame-Options), cookie attributes, CORS policies, and sensitive files.
+                    </p>
+
+                    <div class="sample-bar">
+                        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Sample Targets:</span>
+                        <span class="sample-chip" data-url="https://example.com">https://example.com</span>
+                        <span class="sample-chip" data-url="https://httpbin.org">https://httpbin.org</span>
+                        <span class="sample-chip" data-url="http://testphp.vulnweb.com">http://testphp.vulnweb.com (HTTP Demo)</span>
+                    </div>
+
+                    <form id="form-scan-web">
+                        <div class="form-group">
+                            <label class="form-label" for="web-url">Target Web URL</label>
+                            <div style="display: flex; gap: 0.75rem;">
+                                <input type="text" id="web-url" class="form-control" placeholder="https://example.com" value="https://example.com" required>
+                                <button type="submit" class="btn btn-primary" id="btn-scan-web" style="white-space: nowrap;">
+                                    🔍 Launch Web Audit
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.85rem; font-size: 0.85rem; color: var(--text-secondary);">
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <input type="checkbox" id="chk-ssl" checked> SSL/TLS Health & Expiry
+                            </label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <input type="checkbox" id="chk-headers" checked> Security Headers (CSP, HSTS, X-Frame)
+                            </label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <input type="checkbox" id="chk-cors" checked> CORS Permissive Policy Audit
+                            </label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <input type="checkbox" id="chk-paths" checked> Exposed Endpoints (.env, .git/HEAD)
+                            </label>
+                        </div>
+                    </form>
+
+                    <!-- Terminal Activity Window -->
+                    <div class="terminal-window" id="term-web">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <span class="terminal-dot dot-red"></span>
+                                <span class="terminal-dot dot-yellow"></span>
+                                <span class="terminal-dot dot-green"></span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">web_audit.log</span>
+                        </div>
+                        <div class="terminal-body" id="term-body-web"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: CODE & SAST SCANNER -->
+            <section id="code-tab" class="tab-pane" style="display: none;">
+                <div class="card">
+                    <h2 class="card-title">💻 Source Code & Secret Scanner (SAST)</h2>
+                    <p class="card-subtitle">
+                        Audits source code for hardcoded API keys/secrets, SQL injection f-strings, command injection, insecure deserialization, broken cryptography, and insecure framework configurations.
+                    </p>
+
+                    <div class="sample-bar">
+                        <span class="sample-chip" id="btn-load-vulnerable-sample">
+                            ⚡ Load Vulnerable Code Sample
+                        </span>
+                        <span class="sample-chip" id="btn-scan-current-dir">
+                            📁 Scan Current Project Directory
+                        </span>
+                    </div>
+
+                    <!-- Drag & Drop Zone for File Upload -->
+                    <div class="dropzone" id="code-dropzone">
+                        <div class="dropzone-icon">📄</div>
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">Drag & Drop a Source Code File Here</strong>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                            Supports .py, .js, .ts, .php, .env, .json, .yaml, or Dockerfile (or click to browse)
+                        </p>
+                        <input type="file" id="file-code-upload" style="display: none;">
+                    </div>
+
+                    <form id="form-scan-code">
+                        <div class="form-group">
+                            <label class="form-label" for="code-filename">Source File Name</label>
+                            <input type="text" id="code-filename" class="form-control" value="vulnerable_app.py" style="max-width: 320px;">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="code-input">Source Code Snippet</label>
+                            <textarea id="code-input" class="form-control" rows="12" placeholder="Paste source code or load sample to audit..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="btn-scan-code">
+                            🔍 Run SAST Code Analysis
+                        </button>
+                    </form>
+
+                    <!-- Terminal Activity Window -->
+                    <div class="terminal-window" id="term-code">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <span class="terminal-dot dot-red"></span>
+                                <span class="terminal-dot dot-yellow"></span>
+                                <span class="terminal-dot dot-green"></span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">sast_audit.log</span>
+                        </div>
+                        <div class="terminal-body" id="term-body-code"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: NETWORK & PORT AUDITOR -->
+            <section id="ports-tab" class="tab-pane" style="display: none;">
+                <div class="card">
+                    <h2 class="card-title">🔌 Defensive Port & Service Security Auditor</h2>
+                    <p class="card-subtitle">
+                        Identifies open network ports and flags unencrypted cleartext protocols (Telnet, FTP, POP3) or exposed database endpoints (Redis, MongoDB, MySQL, Postgres, Elasticsearch).
+                    </p>
+
+                    <div class="sample-bar">
+                        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">Sample Hosts:</span>
+                        <span class="sample-chip" data-host="127.0.0.1">Localhost (127.0.0.1)</span>
+                        <span class="sample-chip" data-host="scanme.nmap.org">scanme.nmap.org</span>
+                    </div>
+
+                    <form id="form-scan-ports">
+                        <div class="form-group">
+                            <label class="form-label" for="port-host">Target Host or IP Address</label>
+                            <input type="text" id="port-host" class="form-control" placeholder="127.0.0.1" value="127.0.0.1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="port-range">Port Audit Scope</label>
+                            <select id="port-range" class="form-control" style="max-width: 320px;">
+                                <option value="common">Common Infrastructure & Service Ports</option>
+                                <option value="database">Exposed Database Ports (MySQL, PG, Redis, Mongo, ES)</option>
+                                <option value="web">Web & Proxy Ports (80, 443, 8080, 8000, 3000)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="btn-scan-ports">
+                            🔍 Audit Network Ports
+                        </button>
+                    </form>
+
+                    <!-- Terminal Activity Window -->
+                    <div class="terminal-window" id="term-ports">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <span class="terminal-dot dot-red"></span>
+                                <span class="terminal-dot dot-yellow"></span>
+                                <span class="terminal-dot dot-green"></span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">port_audit.log</span>
+                        </div>
+                        <div class="terminal-body" id="term-body-ports"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: DEPENDENCY SCANNER (SCA) -->
+            <section id="deps-tab" class="tab-pane" style="display: none;">
+                <div class="card">
+                    <h2 class="card-title">📦 Software Composition Analysis (SCA)</h2>
+                    <p class="card-subtitle">
+                        Audits project dependencies (Python <code>requirements.txt</code> or Node.js <code>package.json</code>) against known vulnerability databases and CVE advisories.
+                    </p>
+
+                    <div class="sample-bar">
+                        <span class="sample-chip" id="btn-load-sample-deps">
+                            ⚡ Load Sample Outdated requirements.txt
+                        </span>
+                    </div>
+
+                    <form id="form-scan-deps">
+                        <div class="form-group">
+                            <label class="form-label" for="deps-type">Dependency Ecosystem</label>
+                            <select id="deps-type" class="form-control" style="max-width: 280px;">
+                                <option value="python">Python (requirements.txt)</option>
+                                <option value="nodejs">Node.js (package.json)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="deps-content">Manifest Content</label>
+                            <textarea id="deps-content" class="form-control" rows="11" placeholder="requests==2.28.1&#10;django==3.2.0&#10;pyyaml==5.3.1"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="btn-scan-deps">
+                            🔍 Check Dependencies for CVEs
+                        </button>
+                    </form>
+
+                    <!-- Terminal Activity Window -->
+                    <div class="terminal-window" id="term-deps">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <span class="terminal-dot dot-red"></span>
+                                <span class="terminal-dot dot-yellow"></span>
+                                <span class="terminal-dot dot-green"></span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;">sca_audit.log</span>
+                        </div>
+                        <div class="terminal-body" id="term-body-deps"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: SCAN HISTORY -->
+            <section id="history-tab" class="tab-pane" style="display: none;">
+                <div class="card">
+                    <h2 class="card-title">📜 Audit History & Past Scans</h2>
+                    <p class="card-subtitle">All vulnerability scans performed in this session are tracked and indexed here.</p>
+                    <div id="history-list" style="margin-top: 1rem;">
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">No scans recorded in this session yet.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCAN RESULTS CONTAINER -->
+            <section id="scan-results-container" style="display: none;">
+                <div class="card">
+                    
+                    <!-- Results Header -->
+                    <div class="results-header">
+                        <div>
+                            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--primary); font-weight: 700; letter-spacing: 0.05em;">
+                                Audit Assessment Completed
+                            </div>
+                            <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; margin-top: 2px;">
+                                <span id="res-target-title">Target</span>
+                            </h2>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;" id="res-meta-info">
+                                Type: Web | Duration: 0.45s | Scan ID: abc123
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="btn btn-secondary btn-sm" id="btn-export-html">
+                                📄 Export HTML Report
+                            </button>
+                            <button class="btn btn-secondary btn-sm" id="btn-export-json">
+                                💾 Export JSON
+                            </button>
+                            <button class="btn btn-primary btn-sm" id="btn-ask-ai-summary">
+                                🤖 Ask AI Remediation Plan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Risk Meter & Gauge Bar -->
+                    <div class="risk-meter-wrapper">
+                        <div class="risk-circle">
+                            <svg width="80" height="80" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="40" stroke="#e2e8f0" stroke-width="8" fill="transparent" />
+                                <circle id="risk-circle-bar" cx="50" cy="50" r="40" stroke="#2563eb" stroke-width="8" fill="transparent"
+                                        stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"
+                                        style="transition: stroke-dashoffset 0.8s ease, stroke 0.4s ease;" />
+                            </svg>
+                            <div class="risk-score-text">
+                                <span id="risk-score-display">0</span>
+                                <span>/ 100</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);" id="risk-posture-title">Overall Security Posture</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 650px;" id="risk-posture-desc">
+                                Calculated risk index based on weighted severity scoring of all identified vulnerabilities.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- KPI Breakdown Grid -->
+                    <div class="kpi-container">
+                        <div class="kpi-card">
+                            <div class="kpi-val" id="kpi-critical" style="color: #dc2626;">0</div>
+                            <div class="kpi-label">Critical</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-val" id="kpi-high" style="color: #ea580c;">0</div>
+                            <div class="kpi-label">High</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-val" id="kpi-medium" style="color: #d97706;">0</div>
+                            <div class="kpi-label">Medium</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-val" id="kpi-low" style="color: #2563eb;">0</div>
+                            <div class="kpi-label">Low</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-val" id="kpi-info" style="color: #64748b;">0</div>
+                            <div class="kpi-label">Info</div>
+                        </div>
+                    </div>
+
+                    <!-- Severity Filter Chips -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.25rem 0 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">
+                            Identified Findings (<span id="findings-count">0</span>)
+                        </h3>
+                        <div style="display: flex; gap: 0.35rem;" id="filter-buttons">
+                            <button class="btn btn-secondary btn-sm active" data-filter="ALL">All</button>
+                            <button class="btn btn-secondary btn-sm" data-filter="CRITICAL">Critical</button>
+                            <button class="btn btn-secondary btn-sm" data-filter="HIGH">High</button>
+                            <button class="btn btn-secondary btn-sm" data-filter="MEDIUM">Medium</button>
+                            <button class="btn btn-secondary btn-sm" data-filter="LOW">Low</button>
+                        </div>
+                    </div>
+
+                    <!-- Findings Render Container -->
+                    <div id="findings-container"></div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- RIGHT SIDE: AI AGENT CHATBOT DRAWER -->
+        <aside class="chat-drawer" id="chat-drawer">
+            <div class="chat-header">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <div class="agent-avatar">🤖</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">SentinelAI Assistant</div>
+                        <div style="font-size: 0.72rem; color: #166534; font-weight: 600;">
+                            ● Context-Aware Security Assistant
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-close-chat" style="padding: 0.25rem 0.5rem;">✕</button>
+            </div>
+
+            <!-- Active Scan Context Pill -->
+            <div id="chat-scan-context-pill" style="padding: 0.45rem 1.25rem; background: #f1f5f9; border-bottom: 1px solid var(--border-color); font-size: 0.75rem; color: var(--primary); display: flex; justify-content: space-between; align-items: center;">
+                <span>Context: <strong id="chat-context-name">None loaded</strong></span>
+                <span id="chat-context-findings" style="color: var(--text-muted);">0 findings</span>
+            </div>
+
+            <!-- Message Stream -->
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-msg assistant">
+                    <strong>🛡️ SentinelAI:</strong> Hello! I am your AI Security Engineering Assistant.
+                    <br><br>
+                    You can run an audit from the left panels, or ask me directly:
+                    <ul style="margin: 0.5rem 0 0 1.25rem; font-size: 0.84rem; line-height: 1.5;">
+                        <li>How to fix SQL Injection or Command Injection</li>
+                        <li>Configuring NGINX / FastAPI security headers</li>
+                        <li>Securing exposed database ports (Redis, Mongo)</li>
+                        <li>Upgrades for vulnerable dependencies</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Input & Quick Prompts Area -->
+            <div class="chat-input-area">
+                <div class="chat-chips">
+                    <span class="chat-chip" data-prompt="How do I fix the highest risk vulnerability in this scan?">⚡ Fix Highest Risk</span>
+                    <span class="chat-chip" data-prompt="Show me secure Nginx and FastAPI security headers config">🛡️ Security Headers</span>
+                    <span class="chat-chip" data-prompt="How to prevent SQL injection in Python with parameterized queries?">💉 SQLi Prevention</span>
+                    <span class="chat-chip" data-prompt="What are best practices for securing API keys and secrets?">🔑 Secrets Security</span>
+                </div>
+
+                <form id="chat-form" class="chat-form">
+                    <input type="text" id="chat-input" class="form-control" placeholder="Ask AI how to fix, explain, or patch..." required autocomplete="off">
+                    <button type="submit" class="btn btn-primary" id="btn-send-chat" style="padding: 0.65rem 1rem;">
+                        ➤
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center;">
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); width: 480px; max-width: 90vw; padding: 1.75rem; box-shadow: var(--shadow-lg);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">⚙️ AI Provider Settings</h3>
+                <button id="btn-close-settings" class="btn btn-secondary btn-sm">✕</button>
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
+                Select which intelligence engine powers SentinelAI. The <strong>Offline Security Expert</strong> operates locally with immediate response and zero API keys.
+            </p>
+
+            <div class="form-group">
+                <label class="form-label" for="setting-provider">AI Model Engine</label>
+                <select id="setting-provider" class="form-control">
+                    <option value="offline" selected>Offline Security Expert (Built-in Heuristic & Rules)</option>
+                    <option value="gemini">Google Gemini (Gemini 2.5 Flash)</option>
+                    <option value="openai">OpenAI (GPT-4o-mini)</option>
+                    <option value="groq">Groq (LLaMA-3.3-70B)</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="group-api-key" style="display: none;">
+                <label class="form-label" for="setting-api-key">API Key</label>
+                <input type="password" id="setting-api-key" class="form-control" placeholder="Paste your API key here">
+                <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 4px;">
+                    Stored locally in your browser session for direct API calls.
+                </small>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+                <button type="button" id="btn-save-settings" class="btn btn-primary">
+                    Save Configuration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/chat.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
